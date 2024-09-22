@@ -37,14 +37,9 @@ int main()
             num = array[j];
             for (int k = j + 1; k < n; k++)
             {
-                if (array[k - 1] < array[k] && pointer > array[k])
+                if ((array[k - 1] < array[k] || num < array[k]) && pointer > array[k])
                 {
                     flag = false;
-                    break;
-                }
-                else if (pointer < array[k])
-                {
-                    j = k - 1;
                     break;
                 }
             }
@@ -54,6 +49,6 @@ int main()
         printf("Yes");
     else
         printf("No");
-    // system("pause"); // 防止运行后自动退出，需头文件stdlib.h
+    system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
