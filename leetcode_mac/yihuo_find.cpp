@@ -19,7 +19,7 @@ int main()
 {
     vector<int>  vec1= {1, 1, 3, 3, 3}; 
     int ans = yihuo_find(vec1);
-    printf("%d",ans);
+    printf("%d\n",ans);
     system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
