@@ -13,6 +13,7 @@ int exp[2048];//指数表
 int log[1024];//对数表
 int data[512];//产生的数据
 int codeWord[1023];//对数据编码后的码字
+int syndrome[511];//症状码（syndrome）多项式
 int alpha = 2;//本元
 
 //在GF(2^10)有限域内乘2运算的函数, 0<=num<1024
@@ -147,7 +148,7 @@ int Div(int a,int b)
     }
 }
 
-//编码程序，n=1023，k=512
+//编码程序函数，n=1023，k=512
 void rs_encoder(int* codeword,int n,int* message,int k)
 {
     for(int i=0;i<n;i++)
@@ -155,11 +156,24 @@ void rs_encoder(int* codeword,int n,int* message,int k)
         codeword[i] = 0;//清零
         for(int j=0;j<k;j++)
         {
-            codeword[i] += Mul(message[j],Pow(exp[i],j));//多项式生成码字
+            codeword[i] = Add(codeword[i],(Mul(message[j],Pow(exp[i],j))));//多项式生成码字
         }
     }
 }
 
+//症状码（syndrome）计算函数，n=1023，k=512
+void cal_syn(int* rec,int n,int* syn,int k)
+{
+    int total = n-k;
+    for(int i=0;i<total;i++)
+    {
+        syn[i] = 0;//清零
+        for(int j=0;j<n;j++)
+        {
+            syn[i] = Add(syn[i],(Mul(rec[j],Pow(exp[i],j))));//接收数据多项式生成症状码
+        }
+    }
+}
 
 int main()
 {
@@ -177,11 +191,18 @@ int main()
     rs_encoder(codeWord,1023,data,512);
     for(int i=0;i<1023;i++)
     {
-        printf("%d:%d\n",i,codeWord[i]);
+        //printf("%d:%d\n",i,codeWord[i]);
+    }
+
+    //计算症状码
+    cal_syn(codeWord,1023,syndrome,512);
+    for(int i=0;i<511;i++)
+    {
+        //printf("%d:%d\n",i,syndrome[i]);
     }
 
     // int a=exp[1022],b=2;
-    // printf("%d\n",Pow(a,b));
+    // printf("%d\n",Add(exp[10],exp[10]));
     system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
