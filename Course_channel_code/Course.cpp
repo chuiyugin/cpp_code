@@ -16,6 +16,13 @@ int codeWord[1023];//对数据编码后的码字
 int syndrome[511];//症状码（syndrome）多项式
 int alpha = 2;//本元
 
+//定义多项式结构体
+struct poly{
+    int ci;//系数非零的最高次项是多少
+    int num[512]={0};//多项式参数数组
+};
+
+
 //在GF(2^10)有限域内乘2运算的函数, 0<=num<1024
 int Mul2(int num)
 {
@@ -175,6 +182,23 @@ void cal_syn(int* rec,int n,int* syn,int k)
     }
 }
 
+//多项式乘法函数
+poly poly_Mul(poly a,poly b)
+{
+    poly temp;
+    temp.ci = a.ci + b.ci;
+    for(int i=0;i<=a.ci;i++)
+    {
+        for(int j=0;j<=b.ci;j++)
+        {
+            if(a.num[i]!=0&&b.num[j]!=0)
+                temp.num[i+j] = Mul(a.num[i],b.num[j]);
+        }
+    }
+    return temp;
+}
+
+
 int main()
 {
     //生成指数表和对数表
@@ -201,8 +225,22 @@ int main()
         //printf("%d:%d\n",i,syndrome[i]);
     }
 
+    //验算多项式乘法
+    poly p1,p2,ans;
+    p1.ci = 4;
+    p1.num[4] = 1;
+    p1.num[0] = 1;
+    p2.ci = 2;
+    p2.num[2] = 1;
+    p2.num[0] = 1;
+    ans = poly_Mul(p1,p2);
+    for(int i=0;i<=ans.ci;i++)
+    {
+        printf("%d:%d\n",i,ans.num[i]);
+    }
+
     // int a=exp[1022],b=2;
-    // printf("%d\n",Add(exp[10],exp[10]));
+    //printf("%d\n",Mul(exp[0],exp[0]));
     system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
