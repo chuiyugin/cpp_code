@@ -11,6 +11,8 @@ alpha^10 = b'0000001001 = 0x009
 */
 int exp[2048];//指数表
 int log[1024];//对数表
+int data[512];//产生的数据
+int codeWord[1023];//对数据编码后的码字
 int alpha = 2;//本元
 
 //在GF(2^10)有限域内乘2运算的函数, 0<=num<1024
@@ -88,6 +90,32 @@ int Mul(int a,int b)
     }
 }
 
+//在GF(2^10)有限域内次方运算的函数, 0<=a<1024
+int Pow(int a,int b)
+{
+    if(a<0||a>=1024)
+    {
+        printf("This number not in GF(2^10) field!\n");
+        return -1;
+    }
+    else
+    {
+        if(a==0)
+            return 0;
+        else if(a!=0&&b==0)
+            return 1;
+        else
+        {
+            int ans = 1;//初始化
+            for(int i=0;i<b;i++)
+            {
+                ans = Mul(ans,a);//迭代运算
+            }
+            return ans;
+        }
+    }
+}
+
 //在GF(2^10)有限域内相反数运算的函数, 0<=a<1024
 int Inv(int a)
 {
@@ -119,12 +147,41 @@ int Div(int a,int b)
     }
 }
 
+//编码程序，n=1023，k=512
+void rs_encoder(int* codeword,int n,int* message,int k)
+{
+    for(int i=0;i<n;i++)
+    {
+        codeword[i] = 0;//清零
+        for(int j=0;j<k;j++)
+        {
+            codeword[i] += Mul(message[j],Pow(exp[i],j));//多项式生成码字
+        }
+    }
+}
+
 
 int main()
 {
+    //生成指数表和对数表
     GenerateTables(exp,log);
-    int a=4,b=2;
-    printf("%d\n",Div(a,b));
+
+    //生成消息数据
+    for(int i=0;i<512;i++)
+    {
+        data[i] = i;
+        //printf("%d\n",data[i]);
+    }
+
+    //执行RS(1023,512)编码函数
+    rs_encoder(codeWord,1023,data,512);
+    for(int i=0;i<1023;i++)
+    {
+        printf("%d:%d\n",i,codeWord[i]);
+    }
+
+    // int a=exp[1022],b=2;
+    // printf("%d\n",Pow(a,b));
     system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
