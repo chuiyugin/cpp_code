@@ -29,7 +29,7 @@ int Mul2(int num)
 {
     if(num<0||num>=1024)
     {
-        printf("This number not in GF(2^10) field!\n");
+        printf("This number %d not in GF(2^10) field Mul2!\n",num);
         return -1;
     }
     else
@@ -69,7 +69,7 @@ int Add(int a,int b)
 {
     if((a<0||a>=1024)||(b<0||b>=1024))
     {
-        printf("This number not in GF(2^10) field!\n");
+        printf("This number %d or %d not in GF(2^10) field Add!\n",a,b);
         return -1;
     }
     return a^b;
@@ -87,7 +87,7 @@ int Mul(int a,int b)
 {
     if((a<0||a>=1024)||(b<0||b>=1024))
     {
-        printf("This number not in GF(2^10) field!\n");
+        printf("This number %d or %d not in GF(2^10) field Mul!\n",a,b);
         return -1;
     }
     else
@@ -104,7 +104,7 @@ int Pow(int a,int b)
 {
     if(a<0||a>=1024)
     {
-        printf("This number not in GF(2^10) field!\n");
+        printf("This number %d not in GF(2^10) field Pow!\n",a);
         return -1;
     }
     else
@@ -130,7 +130,7 @@ int Inv(int a)
 {
     if(a<0||a>=1024)
     {
-        printf("This number not in GF(2^10) field!\n");
+        printf("This number %d not in GF(2^10) field Inv!\n",a);
         return -1;
     }
     else
@@ -144,7 +144,7 @@ int Div(int a,int b)
 {
     if((a<0||a>=1024)||(b<=0||b>=1024))
     {
-        printf("This number not in GF(2^10) field!\n");
+        printf("This number %d or %d not in GF(2^10) field!\n",a,b);
         return -1;
     }
     else
@@ -187,7 +187,7 @@ void cal_syn(int* rec,int n,int* syn,int k)
 poly poly_Mul(poly a,poly b)
 {
     poly temp;
-    temp.ci = a.ci + b.ci;
+    int max_index = a.ci + b.ci;
     for(int i=0;i<=a.ci;i++)
     {
         for(int j=0;j<=b.ci;j++)
@@ -195,6 +195,11 @@ poly poly_Mul(poly a,poly b)
             if(a.num[i]!=0&&b.num[j]!=0)
                 temp.num[i+j] = Mul(a.num[i],b.num[j]);
         }
+    }
+    for(int j=0;j<=max_index;j++)
+    {
+        if(temp.num[j]!=0)
+            temp.ci = j;
     }
     return temp;
 }
@@ -222,10 +227,12 @@ void poly_Div(poly a,poly b,poly& shang,poly& yu)
 {
     if( shang.ci!=0 || yu.ci!=0 )
         printf("The poly_Div error!");
+    //printf("poly_Div....\n");
     while(a.ci>=b.ci)
     {
         poly max_num;
         max_num.ci = a.ci-b.ci;
+        //printf("poly_Div:%d,%d\n",a.num[a.ci],b.num[b.ci]);
         max_num.num[max_num.ci] = Div(a.num[a.ci],b.num[b.ci]);//得到最高次项的数据
         poly temp;
         temp = poly_Mul(max_num,b);
@@ -239,7 +246,7 @@ void poly_Div(poly a,poly b,poly& shang,poly& yu)
 poly Euclidean_Algorithm(poly a,poly s)
 {
     //设置初值
-    int t = 2;
+    int t = 255;
     poly q,yu;
     poly_Div(a,s,q,yu);//得到p的初值
     poly g,g1,g2,r,r1,r2;
@@ -255,21 +262,34 @@ poly Euclidean_Algorithm(poly a,poly s)
     // int index = 5;
     // while(index--)
     {
-        // printf("r.ci:%d\n",r.ci);
-        // for(int i=0;i<=r.ci;i++)
+        // printf("q.ci:%d\n",q.ci);
+        // for(int i=0;i<=q.ci;i++)
         // {
-        //     printf("%d:%d\n",i,r.num[i]);
+        //     printf("%d:%d\n",i,q.num[i]);
         // }
         // printf("r2.ci:%d\n",r2.ci);
         // for(int i=0;i<=r2.ci;i++)
         // {
         //     printf("%d:%d\n",i,r2.num[i]);
         // }
+        // printf("r1.ci:%d\n",r1.ci);
+        // for(int i=0;i<=r1.ci;i++)
+        // {
+        //     printf("%d:%d\n",i,r1.num[i]);
+        // }
+        // printf("......\n");
         r = poly_Sub(r1,poly_Mul(q,r2));
+        if (r.ci<255)
+            break;
         // printf("r.ci:%d\n",r.ci);
         // for(int i=0;i<=r.ci;i++)
         // {
         //     printf("%d:%d\n",i,r.num[i]);
+        // }
+        // printf("q.ci:%d\n",q.ci);
+        // for(int i=0;i<=q.ci;i++)
+        // {
+        //     printf("%d:%d\n",i,q.num[i]);
         // }
         r1 = r2;
         r2 = r;
@@ -278,13 +298,29 @@ poly Euclidean_Algorithm(poly a,poly s)
         g2 = g;
         
         //对q清零
+        fill(q.num,q.num+q.ci+8,0);
+        fill(yu.num,yu.num+yu.ci+8,0);
         q.ci=0;
         yu.ci=0;
-        fill(q.num,q.num+q.ci+1,0);
-        fill(yu.num,yu.num+yu.ci+1,0);
         poly_Div(r1,r2,q,yu);//得到q的初值
     }
     return g;
+}
+
+//钱搜索函数
+void CheinSearch(poly g,int* ans)
+{
+    int index = 0;
+    for(int i=0;i<=1023;i++)
+    {
+        int temp = 0;
+        for(int j=0;j<=g.ci;j++)
+        {
+            temp = Add(temp,(Mul(g.num[j],Pow(exp[i],j))));
+        }
+        if(temp==0)
+            ans[index++] = 1023-i;//钱搜索数组
+    }
 }
 
 
@@ -308,24 +344,60 @@ int main()
         //printf("%d:%d\n",i,codeWord[i]);
     }
 
+    //引入传输错误
+    codeWord[1] = 321;//错误地方
+    codeWord[2] = 123;//错误地方
+    for(int i=0;i<1023;i++)
+    {
+        //printf("%d:%d\n",i,codeWord[i]);
+    }
+
     //计算症状码
+    poly test_syn;
+    test_syn.ci = 510;
     cal_syn(codeWord,1023,syndrome,512);
     for(int i=0;i<511;i++)
     {
-        //printf("%d:%d\n",i,syndrome[i]);
+        test_syn.num[i] = syndrome[i];
+        printf("%d:%d\n",i,test_syn.num[i]);
     }
 
-    //验算多项式乘法、加法和除法、辗转相除法
-    poly p1,p2,ans,test_shang,test_yu;
-    p1.ci = 4;
-    p1.num[4] = 1;
-    // p1.num[1] = 1;
-    // p1.num[0] = 1;
-    p2.ci = 3;
-    p2.num[3] = exp[1];
-    p2.num[2] = exp[2];
-    p2.num[1] = exp[2];
-    p2.num[0] = exp[4];
+    //执行辗转相除法
+    poly a,ans;
+    a.ci = 511;
+    a.num[511] = 1;
+    // poly q,yu,r;
+    // poly_Div(a,test_syn,q,yu);//得到p的初值
+    // printf("q.ci:%d\n",q.ci);
+    // for(int i=0;i<=q.ci;i++)
+    // {
+    //     printf("%d:%d\n",i,q.num[i]);
+    // }
+    // r = poly_Sub(a,poly_Mul(q,test_syn));
+    // printf("a.ci:%d\n",a.ci);
+    // for(int i=0;i<=a.ci;i++)
+    // {
+    //     printf("%d:%d\n",i,a.num[i]);
+    // }
+    ans = Euclidean_Algorithm(a,test_syn);//辗转相除法
+    printf("ans.ci:%d\n",ans.ci);
+    for(int i=0;i<=ans.ci;i++)
+    {
+        printf("%d:%d\n",i,ans.num[i]);
+    }
+
+
+    //验算多项式乘法、加法和除法
+    // poly p1,p2,ans,test_shang,test_yu;
+    // p1.ci = 4;
+    // p1.num[4] = 1;
+    // // p1.num[1] = 1;
+    // // p1.num[0] = 1;
+    // p2.ci = 3;
+    // p2.num[3] = exp[1];
+    // p2.num[2] = exp[2];
+    // p2.num[1] = exp[2];
+    // p2.num[0] = exp[4];
     // ans = poly_Mul(p1,p2);//多项式乘法通过
     // ans = poly_Sub(p1,p2);//多项式减法通过
     // for(int i=0;i<=ans.ci;i++)
@@ -338,14 +410,22 @@ int main()
     // {
     //     printf("%d:%d\n",i,test_yu.num[i]);
     // }
+
+    //辗转相除法测试
     //ans = Euclidean_Algorithm(p1,p2);//辗转相除法通过
     // for(int i=0;i<=ans.ci;i++)
     // {
     //     printf("%d:%d\n",i,ans.num[i]);
     // }
 
+    //钱搜索测试
+    // int chein[1024] = {0};
+    // CheinSearch(ans,chein);
+    // for(int i=0;i<=1023;i++)
+    // {
+    //     printf("%d:%d\n",i,chein[i]);
+    // }
 
-    
 
     // int a=exp[1022],b=2;
     //printf("%d\n",Mul(exp[0],exp[0]));
