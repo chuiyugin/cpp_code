@@ -235,8 +235,52 @@ void poly_Div(poly a,poly b,poly& shang,poly& yu)
     }
 }
 
-//辗转相除算法函数
-
+//辗转相除算法函数,a=a(x),s=b(x)=b(x)
+poly Euclidean_Algorithm(poly a,poly s)
+{
+    //设置初值
+    int t = 2;
+    poly q,yu;
+    poly_Div(a,s,q,yu);//得到p的初值
+    poly g,g1,g2,r,r1,r2;
+    g1.ci=0;
+    g2.ci=0;
+    g1.num[0]=0;
+    g2.num[0]=1;
+    r1 = a;
+    r2 = s;
+    r = poly_Sub(r1,poly_Mul(q,r2));
+    //迭代计算
+    while(r.ci>=t)
+    // int index = 5;
+    // while(index--)
+    {
+        // printf("r1.ci:%d\n",r1.ci);
+        // for(int i=0;i<=r1.ci;i++)
+        // {
+        //     printf("%d:%d\n",i,r1.num[i]);
+        // }
+        // printf("r2.ci:%d\n",r2.ci);
+        // for(int i=0;i<=r2.ci;i++)
+        // {
+        //     printf("%d:%d\n",i,r2.num[i]);
+        // }
+        r = poly_Sub(r1,poly_Mul(q,r2));
+        r1 = r2;
+        r2 = r;
+        g = poly_Sub(g1,poly_Mul(q,g2));
+        g1 = g2;
+        g2 = g;
+        
+        //对q清零
+        q.ci=0;
+        yu.ci=0;
+        fill(q.num,q.num+q.ci+1,0);
+        fill(yu.num,yu.num+yu.ci+1,0);
+        poly_Div(r1,r2,q,yu);//得到q的初值
+    }
+    return g;
+}
 
 
 //主函数
@@ -266,7 +310,7 @@ int main()
         //printf("%d:%d\n",i,syndrome[i]);
     }
 
-    //验算多项式乘法、加法和除法
+    //验算多项式乘法、加法和除法、辗转相除法
     poly p1,p2,ans,test_shang,test_yu;
     p1.ci = 4;
     p1.num[4] = 1;
@@ -284,14 +328,16 @@ int main()
     //     printf("%d:%d\n",i,ans.num[i]);
     // }
     // printf("%d %d\n",test_shang.ci,test_yu.ci);
-    poly_Div(p1,p2,test_shang,test_yu);//多项式除法通过
-    for(int i=0;i<=test_yu.ci;i++)
-    {
-        printf("%d:%d\n",i,test_yu.num[i]);
-    }
-    
-
-
+    // poly_Div(p1,p2,test_shang,test_yu);//多项式除法通过
+    // for(int i=0;i<=test_yu.ci;i++)
+    // {
+    //     printf("%d:%d\n",i,test_yu.num[i]);
+    // }
+    // ans = Euclidean_Algorithm(p1,p2);//辗转相除法通过
+    // for(int i=0;i<=ans.ci;i++)
+    // {
+    //     printf("%d:%d\n",i,ans.num[i]);
+    // }
 
     // int a=exp[1022],b=2;
     //printf("%d\n",Mul(exp[0],exp[0]));
