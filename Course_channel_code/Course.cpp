@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 //定义伽罗华域 GF(2^10)
@@ -18,7 +19,7 @@ int alpha = 2;//本元
 
 //定义多项式结构体
 struct poly{
-    int ci;//系数非零的最高次项是多少
+    int ci=0;//系数非零的最高次项是多少
     int num[512]={0};//多项式参数数组
 };
 
@@ -198,7 +199,47 @@ poly poly_Mul(poly a,poly b)
     return temp;
 }
 
+//多项式加减法函数（有限域内加法和减法相同）
+poly poly_Sub(poly a,poly b)
+{
+    int max_index = max(a.ci,b.ci);
+    poly temp;
+    for(int i=0;i<=max_index;i++)
+    {
+        temp.num[i] = Add(a.num[i],b.num[i]);//有限域内加法和减法相同
+        //printf("%d: %d %d %d\n",i,temp.num[i],a.num[i],b.num[i]);
+    }
+    for(int j=0;j<=max_index;j++)
+    {
+        if(temp.num[j]!=0)
+            temp.ci = j;
+    }
+    return temp;
+}
 
+//多项式除法函数，a/b，传入的商和余数poly要保证是空的
+void poly_Div(poly a,poly b,poly& shang,poly& yu)
+{
+    if( shang.ci!=0 || yu.ci!=0 )
+        printf("The poly_Div error!");
+    while(a.ci>=b.ci)
+    {
+        poly max_num;
+        max_num.ci = a.ci-b.ci;
+        max_num.num[max_num.ci] = Div(a.num[a.ci],b.num[b.ci]);//得到最高次项的数据
+        poly temp;
+        temp = poly_Mul(max_num,b);
+        a = poly_Sub(a,temp);
+        shang = poly_Sub(shang,max_num);
+        yu = a;
+    }
+}
+
+//辗转相除算法函数
+
+
+
+//主函数
 int main()
 {
     //生成指数表和对数表
@@ -225,19 +266,32 @@ int main()
         //printf("%d:%d\n",i,syndrome[i]);
     }
 
-    //验算多项式乘法
-    poly p1,p2,ans;
+    //验算多项式乘法、加法和除法
+    poly p1,p2,ans,test_shang,test_yu;
     p1.ci = 4;
     p1.num[4] = 1;
-    p1.num[0] = 1;
-    p2.ci = 2;
-    p2.num[2] = 1;
-    p2.num[0] = 1;
-    ans = poly_Mul(p1,p2);
-    for(int i=0;i<=ans.ci;i++)
+    // p1.num[1] = 1;
+    // p1.num[0] = 1;
+    p2.ci = 3;
+    p2.num[3] = exp[1];
+    p2.num[2] = exp[2];
+    p2.num[1] = exp[2];
+    p2.num[0] = exp[4];
+    // ans = poly_Mul(p1,p2);//多项式乘法通过
+    // ans = poly_Sub(p1,p2);//多项式减法通过
+    // for(int i=0;i<=ans.ci;i++)
+    // {
+    //     printf("%d:%d\n",i,ans.num[i]);
+    // }
+    // printf("%d %d\n",test_shang.ci,test_yu.ci);
+    poly_Div(p1,p2,test_shang,test_yu);//多项式除法通过
+    for(int i=0;i<=test_yu.ci;i++)
     {
-        printf("%d:%d\n",i,ans.num[i]);
+        printf("%d:%d\n",i,test_yu.num[i]);
     }
+    
+
+
 
     // int a=exp[1022],b=2;
     //printf("%d\n",Mul(exp[0],exp[0]));
