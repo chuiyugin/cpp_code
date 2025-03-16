@@ -255,10 +255,10 @@ poly Euclidean_Algorithm(poly a,poly s)
     // int index = 5;
     // while(index--)
     {
-        // printf("r1.ci:%d\n",r1.ci);
-        // for(int i=0;i<=r1.ci;i++)
+        // printf("r.ci:%d\n",r.ci);
+        // for(int i=0;i<=r.ci;i++)
         // {
-        //     printf("%d:%d\n",i,r1.num[i]);
+        //     printf("%d:%d\n",i,r.num[i]);
         // }
         // printf("r2.ci:%d\n",r2.ci);
         // for(int i=0;i<=r2.ci;i++)
@@ -266,6 +266,11 @@ poly Euclidean_Algorithm(poly a,poly s)
         //     printf("%d:%d\n",i,r2.num[i]);
         // }
         r = poly_Sub(r1,poly_Mul(q,r2));
+        // printf("r.ci:%d\n",r.ci);
+        // for(int i=0;i<=r.ci;i++)
+        // {
+        //     printf("%d:%d\n",i,r.num[i]);
+        // }
         r1 = r2;
         r2 = r;
         g = poly_Sub(g1,poly_Mul(q,g2));
@@ -333,14 +338,20 @@ int main()
     // {
     //     printf("%d:%d\n",i,test_yu.num[i]);
     // }
-    // ans = Euclidean_Algorithm(p1,p2);//辗转相除法通过
+    //ans = Euclidean_Algorithm(p1,p2);//辗转相除法通过
     // for(int i=0;i<=ans.ci;i++)
     // {
     //     printf("%d:%d\n",i,ans.num[i]);
     // }
 
+
+    
+
     // int a=exp[1022],b=2;
     //printf("%d\n",Mul(exp[0],exp[0]));
+
+
+
     system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
