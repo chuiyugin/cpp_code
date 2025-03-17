@@ -319,70 +319,144 @@ void poly_Div(poly a,poly b,poly& shang,poly& yu)
 //     return g;
 // }
 
-// Euclidean_Algorithm 循环条件
-poly Euclidean_Algorithm(poly a, poly s, poly& r_ans) {
-    int t = 255; // 纠错能力t=255
-    poly q, yu;
-    poly_Div(a, s, q, yu); // 初始除法
-    poly g1 = {0, {0}}, g2 = {0, {1}}, r1 = a, r2 = s;
+// // Euclidean_Algorithm 循环条件
+// poly Euclidean_Algorithm(poly a, poly s, poly& r_ans) {
+//     int t = 255; // 纠错能力t=255
+//     poly q, yu;
+//     poly_Div(a, s, q, yu); // 初始除法
+//     poly g1 = {0, {0}}, g2 = {0, {1}}, r1 = a, r2 = s;
     
-    while (r2.ci >= t) { // 余数次数≥t时继续
-        poly_Div(r1, r2, q, yu); // 计算商q和余数yu
-        r_ans = yu;
-        poly temp_g = poly_Sub(g1, poly_Mul(q, g2));
+//     while (r2.ci >= t) { // 余数次数≥t时继续
+//         poly_Div(r1, r2, q, yu); // 计算商q和余数yu
+//         r_ans = yu;
+//         poly temp_g = poly_Sub(g1, poly_Mul(q, g2));
         
-        // 更新变量
-        r1 = r2; r2 = yu;
-        g1 = g2; g2 = temp_g;
+//         // 更新变量
+//         r1 = r2; r2 = yu;
+//         g1 = g2; g2 = temp_g;
+//     }
+//     return g2; // 返回错误位置多项式
+// }
+
+// 重写的辗转相除算法函数
+poly Euclidean_Algorithm(poly a, poly s, poly& r_ans) {
+    // 纠错能力 t = 255
+    const int t = 255;
+    // 初始化商和余数多项式
+    poly q = {0, {0}};
+    poly yu = {0, {0}};
+    // 初始化 g1, g2, r1, r2 多项式
+    poly g1 = {0, {0}};
+    poly g2 = {0, {1}};
+    poly r1 = a;
+    poly r2 = s;
+
+    // 进行迭代计算
+    while (r2.ci >= t) {
+        // 计算商 q 和余数 yu
+        poly_Div(r1, r2, q, yu);
+        // 更新 r_ans 为当前余数
+        r_ans = yu;
+
+        // 计算临时的 g 多项式
+        poly temp_g = poly_Sub(g1, poly_Mul(q, g2));
+
+        // 更新 r1, r2, g1, g2
+        r1 = r2;
+        r2 = yu;
+        g1 = g2;
+        g2 = temp_g;
     }
-    return g2; // 返回错误位置多项式
+
+    // 返回错误位置多项式
+    return g2;
 }
 
-//钱搜索函数
-void CheinSearch(poly g,int* ans)
-{
-    int index = 0;
-    int temp = 0;
-    for(int i=0;i<=1023;i++)
-    {
-        temp = 0;
-        for(int j=0;j<=g.ci;j++)
-        {
-            temp = Add(temp,(Mul(g.num[j],Pow(exp[i],j))));
+// // 重写钱搜索函数
+// void CheinSearch(poly g, int* ans) {
+//     int index = 0;
+//     for (int i = 0; i <= 1023; ++i) {
+//         int evaluation = 0;
+//         for (int j = 0; j <= g.ci; ++j) {
+//             evaluation = Add(evaluation, Mul(g.num[j], Pow(exp[i], j)));
+//         }
+//         if (evaluation == 0) {
+//             ans[index++] = 1023 - i;
+//         }
+//     }
+//     // 确保数组末尾为0
+//     ans[index] = 0;
+// }
+
+// // 重写Forney算法实现
+// void Forney(int* ded_codeword, int* rec_codeword, poly g, poly r_ans, int* chein) {
+//     for (int i = 0; chein[i] != 0; ++i) {
+//         int error_position = chein[i];
+//         int numerator = 0;
+//         int denominator = 0;
+
+//         // 计算分子
+//         for (int j = 0; j <= r_ans.ci; ++j) {
+//             numerator = Add(numerator, Mul(r_ans.num[j], Pow(Inv(exp[error_position]), j)));
+//         }
+
+//         // 计算分母
+//         for (int k = 1; k <= g.ci; k += 2) {
+//             denominator = Add(denominator, Mul(g.num[k], Pow(Inv(exp[error_position]), k - 1)));
+//         }
+
+//         // 计算错误值
+//         int error_value = Div(numerator, denominator);
+
+//         // 纠正错误
+//         ded_codeword[error_position] = Add(rec_codeword[error_position], error_value);
+//     }
+// }
+
+// 重写钱搜索函数
+void CheinSearch(poly g, int* ans) {
+    int error_index = 0;
+    // 遍历所有可能的位置
+    for (int i = 0; i < 1024; ++i) {
+        int result = 0;
+        // 计算错误定位多项式在当前位置的值
+        for (int j = 0; j <= g.ci; ++j) {
+            result = Add(result, Mul(g.num[j], Pow(exp[i], j)));
         }
-        //printf("temp:%d\n",temp);
-        if(temp==0)
-            ans[index++] = 1023-i;//钱搜索数组
+        // 如果值为 0，则认为该位置是错误位置
+        if (result == 0) {
+            ans[error_index++] = 1023 - i;
+        }
     }
+    // 标记错误位置数组的结束
+    ans[error_index] = -1;
 }
 
-//Forney算法实现
-void Forney(int* ded_codeword,int* rec_codeword,poly g,poly r_ans,int* chein)
-{
-    int fenzi,fenmu,err;
-    for(int i=0;i<1024;i++)
-    {
-        if(chein[i]==0)
-            break;
-        else 
-        {
-            fenzi = 0;
-            fenmu = 0;
-            for(int j=0;j<=r_ans.ci;j++)
-            {
-                fenzi = Add(fenzi,(Mul(r_ans.num[j],Pow(Inv(exp[chein[i]]),j))));
-            }
-            //printf("fenzi:%d\n",fenzi);
-            for(int k=1;k<=g.ci;k++)
-            {
-                if(k%2!=0) 
-                    fenmu = Add(fenmu,(Mul(g.num[k],Pow(Inv(exp[chein[i]]),k-1))));
-                //printf("fenmu:%d\n",fenmu);
-            }
-            err = Div(fenzi,fenmu);
-            //printf("err:%d\n",err);
-            ded_codeword[chein[i]] = Add(rec_codeword[chein[i]],err);
+// 重写 Forney 算法实现
+void Forney(int* ded_codeword, int* rec_codeword, poly g, poly r_ans, int* chein) {
+    int i = 0;
+    // 遍历错误位置数组
+    while (chein[i] != -1) {
+        int error_position = chein[i];
+        int numerator = 0;
+        int denominator = 0;
+
+        // 计算错误值的分子
+        for (int j = 0; j <= r_ans.ci; ++j) {
+            numerator = Add(numerator, Mul(r_ans.num[j], Pow(Inv(exp[error_position]), j)));
         }
+
+        // 计算错误值的分母
+        for (int k = 1; k <= g.ci; k += 2) {
+            denominator = Add(denominator, Mul(g.num[k], Pow(Inv(exp[error_position]), k - 1)));
+        }
+
+        // 计算错误值
+        int error_value = Div(numerator, denominator);
+
+        // 对接收码字进行纠错
+        ded_codeword[error_position] = Add(rec_codeword[error_position], error_value);
+        ++i;
     }
 }
 
@@ -409,7 +483,7 @@ int main()
 
     //引入传输错误
     //codeWord[5] = 123;//错误地方
-    codeWord[2] = 341;//错误地方
+    //codeWord[2] = 341;//错误地方
     codeWord[20] = 123;//错误地方
     for(int i=0;i<1023;i++)
     {
@@ -462,52 +536,6 @@ int main()
         printf("rec:%d:%d\n",i,codeWord[i]);
         printf("ded:%d:%d\n",i,ded_codeword[i]);
     }
-
-
-    //验算多项式乘法、加法和除法
-    // poly p1,p2,ans,test_shang,test_yu;
-    // p1.ci = 4;
-    // p1.num[4] = 1;
-    // // p1.num[1] = 1;
-    // // p1.num[0] = 1;
-    // p2.ci = 3;
-    // p2.num[3] = exp[1];
-    // p2.num[2] = exp[2];
-    // p2.num[1] = exp[2];
-    // p2.num[0] = exp[4];
-    // ans = poly_Mul(p1,p2);//多项式乘法通过
-    // ans = poly_Sub(p1,p2);//多项式减法通过
-    // for(int i=0;i<=ans.ci;i++)
-    // {
-    //     printf("%d:%d\n",i,ans.num[i]);
-    // }
-    // printf("%d %d\n",test_shang.ci,test_yu.ci);
-    // poly_Div(p1,p2,test_shang,test_yu);//多项式除法通过
-    // for(int i=0;i<=test_yu.ci;i++)
-    // {
-    //     printf("%d:%d\n",i,test_yu.num[i]);
-    // }
-
-    //辗转相除法测试
-    //ans = Euclidean_Algorithm(p1,p2);//辗转相除法通过
-    // for(int i=0;i<=ans.ci;i++)
-    // {
-    //     printf("%d:%d\n",i,ans.num[i]);
-    // }
-
-    //钱搜索测试
-    // int chein[1024] = {0};
-    // CheinSearch(ans,chein);
-    // for(int i=0;i<=1023;i++)
-    // {
-    //     printf("%d:%d\n",i,chein[i]);
-    // }
-
-
-    // int a=exp[1022],b=2;
-    //printf("%d\n",Mul(exp[0],exp[0]));
-
-
 
     system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
