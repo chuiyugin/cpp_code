@@ -26,53 +26,77 @@ struct ListNode
 };
 
 //解决方案
+// class Solution {
+//     public:
+//         ListNode* swapPairs(ListNode* head) {
+//             ListNode* temp = nullptr;
+//             ListNode* temp1 = nullptr;
+//             ListNode* now = nullptr;
+//             int count = 0;
+//             if((head==nullptr) || (head->next==nullptr))
+//                 return head;
+//             else if(head->next->next == nullptr)
+//             {
+//                 temp = head->next;
+//                 head->next = nullptr;
+//                 temp->next = head;
+//                 return temp;
+//             }
+//             else
+//             {
+//                 now = head;
+//                 int count = 0;
+//                 while(now->next!=nullptr && now->next->next!=nullptr)
+//                 {
+//                     if(count==0)
+//                     {
+//                         head = now->next;
+//                         now->next = now->next->next;
+//                         head->next = now;
+//                         count++;
+//                     }
+//                     else if(count%2==1)
+//                     {
+//                         temp = now->next;
+//                         temp1 = now->next->next->next;
+//                         now->next = now->next->next;
+//                         now->next->next = temp;
+//                         temp->next = temp1;
+//                         count++;
+//                         now = now->next;
+//                     }
+//                     else
+//                     {
+//                         count++;
+//                         now = now->next;
+//                     }
+//                 }
+//                 return head;
+//             }
+//         }
+//     };
+
+//虚拟头节点解法
 class Solution {
     public:
         ListNode* swapPairs(ListNode* head) {
             ListNode* temp = nullptr;
             ListNode* temp1 = nullptr;
-            ListNode* now = nullptr;
-            int count = 0;
-            if((head==nullptr) || (head->next==nullptr))
-                return head;
-            else if(head->next->next == nullptr)
+            ListNode* VitHead = new ListNode(-1);
+            VitHead->next = head;
+            ListNode* now = VitHead;
+            while((now->next != nullptr) && (now->next->next != nullptr))
             {
-                temp = head->next;
-                head->next = nullptr;
-                temp->next = head;
-                return temp;
+                temp = now->next;
+                temp1 = now->next->next->next;
+                
+                now->next = now->next->next;
+                now->next->next = temp;
+                temp->next = temp1;
+
+                now = now->next->next;
             }
-            else
-            {
-                now = head;
-                int count = 0;
-                while(now->next!=nullptr && now->next->next!=nullptr)
-                {
-                    if(count==0)
-                    {
-                        head = now->next;
-                        now->next = now->next->next;
-                        head->next = now;
-                        count++;
-                    }
-                    else if(count%2==1)
-                    {
-                        temp = now->next;
-                        temp1 = now->next->next->next;
-                        now->next = now->next->next;
-                        now->next->next = temp;
-                        temp->next = temp1;
-                        count++;
-                        now = now->next;
-                    }
-                    else
-                    {
-                        count++;
-                        now = now->next;
-                    }
-                }
-                return head;
-            }
+            return VitHead->next;
         }
     };
 
