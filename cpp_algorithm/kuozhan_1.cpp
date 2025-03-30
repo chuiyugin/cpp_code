@@ -59,6 +59,6 @@ int main()
     }
     else
         printf("No Solution\n");
-    system("pause"); // 防止运行后自动退出，需头文件stdlib.h
+    //system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
