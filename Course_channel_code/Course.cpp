@@ -196,7 +196,10 @@ poly poly_Mul(poly a, poly b)
         for (int j = 0; j <= b.ci; j++)
         {
             if (a.num[i] != 0 && b.num[j] != 0)
-                temp.num[i + j] = Mul(a.num[i], b.num[j]);
+            {
+                // 对相同次数项的系数进行异或操作
+                temp.num[i + j] = Add(temp.num[i + j], Mul(a.num[i], b.num[j])); 
+            }
         }
     }
     for (int j = 0; j <= max_index; j++)
@@ -438,10 +441,10 @@ int main()
     }
 
     // 引入传输错误
-    //codeWord[565] = 123;//错误地方
-    //codeWord[2] = 341;//错误地方
-    //codeWord[20] = 123; // 错误地方
-    bsc_channel(codeWord, 0.1);
+    codeWord[565] = 123;//错误地方
+    codeWord[2] = 341;//错误地方
+    codeWord[20] = 123; // 错误地方
+    //bsc_channel(codeWord, 0.1);
     for (int i = 0; i < 1023; i++)
     {
         // printf("%d:%d\n",i,codeWord[i]);

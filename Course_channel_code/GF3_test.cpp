@@ -195,7 +195,10 @@ poly poly_Mul(poly a, poly b)
         for (int j = 0; j <= b.ci; j++)
         {
             if (a.num[i] != 0 && b.num[j] != 0)
-                temp.num[i + j] = Mul(a.num[i], b.num[j]);
+            {
+                // 对相同次数项的系数进行异或操作
+                temp.num[i + j] = Add(temp.num[i + j], Mul(a.num[i], b.num[j])); 
+            }
         }
     }
     for (int j = 0; j <= max_index; j++)
@@ -326,7 +329,7 @@ void poly_Div(poly a, poly b, poly &shang, poly &yu)
 // Euclidean_Algorithm 循环条件
 poly Euclidean_Algorithm(poly a, poly s, poly &r_ans)
 {
-    int t = 2; // 纠错能力t=255
+    int t = 2; // 纠错能力t=2
     poly q, yu;
     poly_Div(a, s, q, yu); // 初始除法
     poly g1 = {0, {0}}, g2 = {0, {1}}, r1 = a, r2 = s;
@@ -335,6 +338,7 @@ poly Euclidean_Algorithm(poly a, poly s, poly &r_ans)
     {                            // 余数次数≥t时继续
         poly_Div(r1, r2, q, yu); // 计算商q和余数yu
         r_ans = yu;
+        
         poly temp_g = poly_Sub(g1, poly_Mul(q, g2));
 
         // 更新变量
@@ -342,6 +346,23 @@ poly Euclidean_Algorithm(poly a, poly s, poly &r_ans)
         r2 = yu;
         g1 = g2;
         g2 = temp_g;
+
+        // printf("q.ci:%d\n",q.ci);
+        // for(int i=0;i<=q.ci;i++)
+        // {
+        //     printf("%d:%d\n",i,q.num[i]);
+        // }
+        // printf("yu.ci:%d\n",yu.ci);
+        // for(int i=0;i<=yu.ci;i++)
+        // {
+        //     printf("%d:%d\n",i,yu.num[i]);
+        // }
+        // printf("g2.ci:%d\n",g2.ci);
+        // for(int i=0;i<=g2.ci;i++)
+        // {
+        //     printf("%d:%d\n",i,g2.num[i]);
+        // }
+
     }
     return g2; // 返回错误位置多项式
 }
@@ -388,7 +409,7 @@ void Forney(int *ded_codeword, int *rec_codeword, poly g, poly r_ans, int *chein
                 // printf("fenmu:%d\n",fenmu);
             }
             err = Div(fenzi, fenmu);
-            // printf("err:%d\n",err);
+            //printf("err:%d\n",err);
             ded_codeword[chein[i]] = Add(rec_codeword[chein[i]], err);
         }
     }
@@ -466,6 +487,8 @@ int main()
     // }
 
     ans = Euclidean_Algorithm(a, test_syn, r_ans); // 辗转相除法
+    //ans.num[1] = 4;
+    //ans.num[0] = 3;
     printf("ans.ci:%d\n", ans.ci);
     for(int i=0;i<=ans.ci;i++)
     {
@@ -476,6 +499,7 @@ int main()
     {
         printf("%d:%d\n",i,r_ans.num[i]);
     }
+    
 
     // 钱搜索测试
     int chein[8] = {-1};
@@ -540,7 +564,24 @@ int main()
     // //  }
 
     // // int a=exp[1022],b=2;
-    // // printf("%d\n",Mul(exp[0],exp[0]));
+    // printf("%d\n",Add(1,2));
+
+    // poly t,b,c,d;
+    // t.ci = 1;
+    // b.ci = 1;
+    // t.num[0] = 4;
+    // t.num[1] = 2;
+    // b.num[0] = 5;
+    // b.num[1] = 6;
+    // d.ci = 0;
+    // d.num[0] = 1;
+    // c = poly_Sub(d,poly_Mul(t,b));
+    // printf("c.ci:%d\n",c.ci);
+    // for(int i=0;i<=c.ci;i++)
+    // {
+    //     printf("%d:%d\n",i,c.num[i]);
+    // }
+
     system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
