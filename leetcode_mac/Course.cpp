@@ -63,7 +63,6 @@ void GenerateTables(int *my_exp, int *my_log)
     // 特殊值处理
     my_exp[2047] = my_exp[1024];
     my_log[0] = NULL;
-    my_log[1] = 0;
 }
 
 // 在GF(2^10)有限域内加法运算的函数, 0<=a<1024,0<=b<1024
@@ -175,12 +174,12 @@ void rs_encoder(int *codeword, int n, int *message, int k)
 void cal_syn(int *rec, int n, int *syn, int k)
 {
     int total = n - k;
-    for (int i = 1; i <= total; i++)
+    for (int i = 0; i < total; i++)
     {
-        syn[i-1] = 0; // 清零
+        syn[i] = 0; // 清零
         for (int j = 0; j < n; j++)
         {
-            syn[i-1] = Add(syn[i-1], (Mul(rec[j], Pow(exp[i], j)))); // 接收数据多项式生成症状码
+            syn[i] = Add(syn[i], (Mul(rec[j], Pow(exp[i], j)))); // 接收数据多项式生成症状码
         }
     }
 }
@@ -195,10 +194,7 @@ poly poly_Mul(poly a, poly b)
         for (int j = 0; j <= b.ci; j++)
         {
             if (a.num[i] != 0 && b.num[j] != 0)
-            {
-                // 对相同次数项的系数进行异或操作
-                temp.num[i + j] = Add(temp.num[i + j], Mul(a.num[i], b.num[j])); 
-            }
+                temp.num[i + j] = Mul(a.num[i], b.num[j]);
         }
     }
     for (int j = 0; j <= max_index; j++)
@@ -329,7 +325,7 @@ void poly_Div(poly a, poly b, poly &shang, poly &yu)
 // Euclidean_Algorithm 循环条件
 poly Euclidean_Algorithm(poly a, poly s, poly &r_ans)
 {
-    int t = 256; // 纠错能力t=255
+    int t = 255; // 纠错能力t=255
     poly q, yu;
     poly_Div(a, s, q, yu); // 初始除法
     poly g1 = {0, {0}}, g2 = {0, {1}}, r1 = a, r2 = s;
@@ -354,14 +350,14 @@ void CheinSearch(poly g, int *ans)
 {
     int index = 0;
     int temp = 0;
-    for (int i = 1; i <= 1023; i++)
+    for (int i = 0; i <= 1023; i++)
     {
         temp = 0;
         for (int j = 0; j <= g.ci; j++)
         {
             temp = Add(temp, (Mul(g.num[j], Pow(exp[i], j))));
         }
-        //printf("temp:%d\n",temp);
+        // printf("temp:%d\n",temp);
         if (temp == 0)
             ans[index++] = 1023 - i; // 钱搜索数组
     }
@@ -373,7 +369,7 @@ void Forney(int *ded_codeword, int *rec_codeword, poly g, poly r_ans, int *chein
     int fenzi, fenmu, err;
     for (int i = 0; i < 1024; i++)
     {
-        if (chein[i] == -1)
+        if (chein[i] == 0)
             break;
         else
         {
@@ -418,9 +414,9 @@ int main()
     }
 
     // 引入传输错误
-    codeWord[565] = 123;//错误地方
-    codeWord[2] = 341;//错误地方
-    codeWord[20] = 123; // 错误地方
+    // codeWord[5] = 123;//错误地方
+    //codeWord[298] = 341;//错误地方
+    //codeWord[20] = 123; // 错误地方
     for (int i = 0; i < 1023; i++)
     {
         // printf("%d:%d\n",i,codeWord[i]);
@@ -428,17 +424,8 @@ int main()
 
     // 计算症状码
     poly test_syn;
-    memset(syndrome, 0, sizeof(syndrome));
-    bool flag = false;
+    test_syn.ci = 510;
     cal_syn(codeWord, 1023, syndrome, 512);
-    for(int i=(sizeof(syndrome)/4-1);i>=0;i--)
-    {
-        if((syndrome[i]!=0) && (flag == false))
-        {
-            test_syn.ci = i;
-            flag = true;
-        }
-    }
     for (int i = 0; i < 511; i++)
     {
         test_syn.num[i] = syndrome[i];
@@ -462,8 +449,7 @@ int main()
     // }
 
     // 钱搜索测试
-    int chein[1024] = {-1};
-    memset(chein, -1, sizeof(chein));
+    int chein[1024] = {0};
     CheinSearch(ans, chein);
     printf("错误的地方:\n");
     for (int i = 0; i <= 1023; i++)

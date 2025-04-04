@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
+#include <ctime>
 using namespace std;
 
 // 定义伽罗华域 GF(2^10)
@@ -63,6 +64,7 @@ void GenerateTables(int *my_exp, int *my_log)
     // 特殊值处理
     my_exp[2047] = my_exp[1024];
     my_log[0] = NULL;
+    my_log[1] = 0;
 }
 
 // 在GF(2^10)有限域内加法运算的函数, 0<=a<1024,0<=b<1024
@@ -174,12 +176,12 @@ void rs_encoder(int *codeword, int n, int *message, int k)
 void cal_syn(int *rec, int n, int *syn, int k)
 {
     int total = n - k;
-    for (int i = 0; i < total; i++)
+    for (int i = 1; i <= total; i++)
     {
-        syn[i] = 0; // 清零
+        syn[i-1] = 0; // 清零
         for (int j = 0; j < n; j++)
         {
-            syn[i] = Add(syn[i], (Mul(rec[j], Pow(exp[i], j)))); // 接收数据多项式生成症状码
+            syn[i-1] = Add(syn[i-1], (Mul(rec[j], Pow(exp[i], j)))); // 接收数据多项式生成症状码
         }
     }
 }
@@ -194,7 +196,10 @@ poly poly_Mul(poly a, poly b)
         for (int j = 0; j <= b.ci; j++)
         {
             if (a.num[i] != 0 && b.num[j] != 0)
-                temp.num[i + j] = Mul(a.num[i], b.num[j]);
+            {
+                // 对相同次数项的系数进行异或操作
+                temp.num[i + j] = Add(temp.num[i + j], Mul(a.num[i], b.num[j])); 
+            }
         }
     }
     for (int j = 0; j <= max_index; j++)
@@ -325,7 +330,7 @@ void poly_Div(poly a, poly b, poly &shang, poly &yu)
 // Euclidean_Algorithm 循环条件
 poly Euclidean_Algorithm(poly a, poly s, poly &r_ans)
 {
-    int t = 255; // 纠错能力t=255
+    int t = 256; // 纠错能力t=255
     poly q, yu;
     poly_Div(a, s, q, yu); // 初始除法
     poly g1 = {0, {0}}, g2 = {0, {1}}, r1 = a, r2 = s;
@@ -350,14 +355,14 @@ void CheinSearch(poly g, int *ans)
 {
     int index = 0;
     int temp = 0;
-    for (int i = 0; i <= 1023; i++)
+    for (int i = 1; i <= 1023; i++)
     {
         temp = 0;
         for (int j = 0; j <= g.ci; j++)
         {
             temp = Add(temp, (Mul(g.num[j], Pow(exp[i], j))));
         }
-        // printf("temp:%d\n",temp);
+        //printf("temp:%d\n",temp);
         if (temp == 0)
             ans[index++] = 1023 - i; // 钱搜索数组
     }
@@ -369,7 +374,7 @@ void Forney(int *ded_codeword, int *rec_codeword, poly g, poly r_ans, int *chein
     int fenzi, fenmu, err;
     for (int i = 0; i < 1024; i++)
     {
-        if (chein[i] == 0)
+        if (chein[i] == -1)
             break;
         else
         {
@@ -393,6 +398,27 @@ void Forney(int *ded_codeword, int *rec_codeword, poly g, poly r_ans, int *chein
     }
 }
 
+// BSC 信道函数
+void bsc_channel(int *codeWord, double p) {
+    // 初始化随机数种子
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+    // 随机选择一个位置
+    int index = std::rand() % 1023;
+    
+    printf("BSC 信道函数在某处造成了传输错误:\n %d\n",index);
+    printf("BSC 信道函数修改前的值:\n %d\n",codeWord[index]);
+    
+    // 以概率 p 翻转该位置的值
+    double random_value = static_cast<double>(std::rand()) / RAND_MAX * 0.1;
+    if (random_value < p) {
+        // 假设在GF(2^10)有限域内翻转值
+        int new_value = rand() % 1024;
+        codeWord[index] = new_value;
+    }
+    printf("BSC 信道函数修改后的值:\n %d\n",codeWord[index]);
+}
+
 // 主函数
 int main()
 {
@@ -408,15 +434,18 @@ int main()
 
     // 执行RS(1023,512)编码函数
     rs_encoder(codeWord, 1023, data, 512);
+    printf("RS(1023,512)编码后的数据:\n");
     for (int i = 0; i < 1023; i++)
     {
         printf("%d:%d\n", i, codeWord[i]);
     }
 
     // 引入传输错误
-    // codeWord[5] = 123;//错误地方
+    codeWord[565] = 123;//错误地方
     codeWord[2] = 341;//错误地方
     codeWord[20] = 123; // 错误地方
+    codeWord[456] = 321; // 错误地方
+    //bsc_channel(codeWord, 0.1);
     for (int i = 0; i < 1023; i++)
     {
         // printf("%d:%d\n",i,codeWord[i]);
@@ -424,8 +453,17 @@ int main()
 
     // 计算症状码
     poly test_syn;
-    test_syn.ci = 510;
+    memset(syndrome, 0, sizeof(syndrome));
+    bool flag = false;
     cal_syn(codeWord, 1023, syndrome, 512);
+    for(int i=(sizeof(syndrome)/4-1);i>=0;i--)
+    {
+        if((syndrome[i]!=0) && (flag == false))
+        {
+            test_syn.ci = i;
+            flag = true;
+        }
+    }
     for (int i = 0; i < 511; i++)
     {
         test_syn.num[i] = syndrome[i];
@@ -437,7 +475,7 @@ int main()
     a.ci = 511;
     a.num[511] = 1;
     ans = Euclidean_Algorithm(a, test_syn, r_ans); // 辗转相除法
-    printf("ans.ci:%d\n", ans.ci);
+    // printf("ans.ci:%d\n", ans.ci);
     // for(int i=0;i<=ans.ci;i++)
     // {
     //     printf("%d:%d\n",i,ans.num[i]);
@@ -449,12 +487,14 @@ int main()
     // }
 
     // 钱搜索测试
-    int chein[1024] = {0};
+    int chein[1024] = {-1};
+    memset(chein, -1, sizeof(chein));
     CheinSearch(ans, chein);
-    printf("错误的地方:\n");
+    printf("钱搜索错误的地方:\n");
     for (int i = 0; i <= 1023; i++)
     {
-        printf("%d:%d\n", i, chein[i]);
+        if(chein[i]!=-1)
+            printf("%d:%d\n", i, chein[i]);
     }
 
     // 执行forney算法
@@ -464,6 +504,7 @@ int main()
         ded_codeword[i] = codeWord[i];
     }
     Forney(ded_codeword, codeWord, ans, r_ans, chein);
+    printf("RS(1023,512)译码后的对比:\n");
     for (int i = 0; i < 1023; i++)
     {
         printf("rec:%d:%d\n", i, codeWord[i]);
