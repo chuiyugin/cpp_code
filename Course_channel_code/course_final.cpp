@@ -216,7 +216,7 @@ poly poly_Sub(poly a, poly b)
     poly temp;
     for (int i = 0; i <= max_index; i++)
     {
-        temp.num[i] = Add(a.num[i], b.num[i]); //有限域内加法和减法相同
+        temp.num[i] = Add(a.num[i], b.num[i]); // 有限域内加法和减法相同
     }
     for (int j = 0; j <= max_index; j++)
     {
@@ -349,7 +349,7 @@ void bsc_channel(int *codeWord, double p)
 // 辗转相除法译码函数
 void rs_decoder_EA_algorithm(int *ded_codeWord, int *rec_codeWord, int n, int k)
 {
-    // 计算症状码
+    // 计算症状码(syndrome)
     poly test_syn;
     memset(syndrome, 0, sizeof(syndrome));
     bool flag = false;
@@ -373,7 +373,7 @@ void rs_decoder_EA_algorithm(int *ded_codeWord, int *rec_codeWord, int n, int k)
     a.num[511] = 1;
     ans = Euclidean_Algorithm(a, test_syn, r_ans); // 辗转相除法
 
-    // 钱搜索
+    // 执行钱搜索算法
     int chein[1024] = {-1};
     int num = 0;
     memset(chein, -1, sizeof(chein));
