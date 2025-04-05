@@ -12,6 +12,7 @@ poly = 1 + x^3 + x^10
 alpha = 2
 alpha^10 = b'0000001001 = 0x009
 */
+
 int exp[2048];          // 指数表
 int log[1024];          // 对数表
 int data[512];          // 产生的数据
@@ -378,7 +379,7 @@ void rs_decoder_EA_algorithm(int *ded_codeWord, int *rec_codeWord, int n, int k)
     int num = 0;
     memset(chein, -1, sizeof(chein));
     num = CheinSearch(ans, chein);
-    printf("\n钱搜索找到 %d 个错误的地方:\n", num);
+    printf("\n钱搜索共找到 %d 个传输错误的地方:\n", num);
     for (int i = 0; i <= 1023; i++)
     {
         if (chein[i] != -1)
