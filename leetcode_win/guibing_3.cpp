@@ -12,10 +12,28 @@ class Solution {
             vector<int> temp(R-L+1);
             int i = L,j = M+1,k = 0;
             int ans = 0;
+            
+            //计算左边数比右边数大2倍的数量
+            while(i<=M && j<=R+1)
+            {
+                if(nums[i]>2*nums[j])
+                {
+                    if(j<=R)
+                        j++;
+                    else
+                        break;
+                }
+                else
+                {
+                    ans += j-(M+1);
+                    i++;
+                }
+            }
+
+            //排序合并
+            i = L,j = M+1,k = 0;
             while(i<=M && j<=R)
             {
-                //左组小于右组数，把小和累加进去
-                ans += nums[i]<nums[j] ? (R-j+1)*nums[i] : 0;
                 temp[k++] = nums[i]<nums[j] ? nums[i++] : nums[j++];
             }
             //要么i越界了,把j剩下的拷贝进去
@@ -40,7 +58,7 @@ class Solution {
             return ans;
         }
     
-        int smallSum(vector<int>& nums) {
+        int Than2(vector<int>& nums) {
             int ans;
             ans = process(nums,0,nums.size()-1);
             return ans;
@@ -50,15 +68,11 @@ class Solution {
 int main()
 {
     Solution mysolution;
-    vector<int> vec;
-    int ans,num,temp;
-    scanf("%d",&num);
-    for(int i=0;i<num;i++)
-    {
-        scanf("%d",&temp);
-        vec.push_back(temp);
-    }
-    ans = mysolution.smallSum(vec);
+    vector<int> vec = {8,3,5,1,2};
+    int ans;
+    ans = mysolution.Than2(vec);
     printf("%d\n",ans);
+
+    system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
 }
