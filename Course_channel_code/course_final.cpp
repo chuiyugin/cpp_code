@@ -344,7 +344,7 @@ void bsc_channel(int *codeWord, double p)
             num++;
         }
     }
-    printf("BSC 信道总共造成 %d 处错误\n", num);
+    printf("\nBSC 信道总共造成 %d 处错误\n", num);
 }
 
 // 辗转相除法译码函数
