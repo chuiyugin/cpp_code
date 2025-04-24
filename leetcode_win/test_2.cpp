@@ -3,6 +3,7 @@
 #include <iostream>
 using namespace std;
 
+
 int test(int *a[])
 {
     printf("%d\n", *a[0]);
@@ -13,6 +14,7 @@ int main()
 {
     // printf("你好\n");
     // cout<<__cplusplus<<endl;
+
 
     int arr[3] = {1, 2, 3};
     int *p = &arr[1];

@@ -43,7 +43,8 @@
         "set": "cpp",
         "queue": "cpp",
         "map": "cpp",
-        "climits": "cpp"
+        "climits": "cpp",
+        "ctime": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
