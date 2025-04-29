@@ -3,7 +3,9 @@
 #include <time.h>
 #include "hashmap.h"
 
-#define DEFAULT_CAPACITY 8
+#define DEFAULT_CAPACITY 4
+#define LOAD_FACTOR 0.75
+#define MAX_PREALLOCATE 256
 
 // 创建空的哈希表
 HashMap* create_hashmap(void)
@@ -68,6 +70,54 @@ uint32_t hash(const void* key, int len, uint32_t seed) {
     return h;
 }
 
+//扩容函数的子函数
+void rehash(KeyValueNode* cur,KeyValueNode** new_table,int new_capacity,uint32_t seed)
+{
+    //计算key的哈希值
+    int len = strlen(cur->key);
+    int idx = hash(cur->key,len,seed) % new_capacity;
+    //头插法
+    cur->next = new_table[idx];
+    new_table[idx] = cur;
+}
+
+//对哈希表进行扩容
+void grow_capacity(HashMap* map)
+{
+    //新的容量
+    int new_capacity = (map->capacity <= MAX_PREALLOCATE)?
+                    (map->capacity << 1) : (map->capacity + MAX_PREALLOCATE);
+    //创建新的哈希数组
+    KeyValueNode** new_table = calloc(new_capacity,sizeof(KeyValueNode*));
+    if(new_table == NULL)
+    {
+        printf("ERROR:calloc failed in grow_capacity!");
+        exit(1);
+    }
+    //重新设置哈希种子(更加安全)
+    uint32_t new_seed = time(NULL);
+    //将旧的哈希表迁移到新的哈希表上
+    for(int i=0; i<map->capacity; i++)
+    {
+        KeyValueNode* cur = map->table[i];
+        while(cur != NULL)
+        {
+            KeyValueNode* next = cur->next;
+            //将旧表重映射到新表上
+            rehash(cur,new_table,new_capacity,new_seed);
+            cur = next;
+        }
+    }
+    //释放旧的表
+    free(map->table);
+
+    //更新参数
+    map->table = new_table;
+    map->capacity = new_capacity;
+    map->hash_seed = new_seed;
+}
+
+
 // 往哈希表添加元素
 // a.如果key不存在，添加 key-val，并返回NULL
 // b.如果key存在，更新key关联的val，返回原来的val
@@ -90,10 +140,25 @@ V put(HashMap* map, K key, V val)
     //cur == NULL
     //a.如果key不存在，添加 key-val，并返回NULL
     KeyValueNode* new_node = malloc(sizeof(KeyValueNode));
+    if(new_node == NULL)
+    {
+        printf("ERROR:malloc failed in put!");
+        exit(1);
+    }
     new_node->key = key;
     new_node->val = val;
-    new_node->next = map->table[idx];//map->table[idx]哈希桶也存放着结点
 
+    //判断是否需要扩容
+    double table_load = (1.0 * map->size) / map->capacity;
+    //如果超过负载因子就需要扩容
+    if(table_load >= LOAD_FACTOR)
+    {
+        grow_capacity(map);
+        //计算新的索引
+        idx = hash(key,strlen(key),map->hash_seed) % map->capacity;
+    }
+    //头插法
+    new_node->next = map->table[idx];//map->table[idx]哈希桶也存放着结点
     //链接
     map->table[idx] = new_node;
     //更新哈希表信息

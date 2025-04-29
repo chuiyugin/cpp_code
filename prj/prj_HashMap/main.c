@@ -9,22 +9,29 @@ int main(void)
     put(map, "test", "123");
     put(map, "test1", "234");
     put(map, "test2", "345");
+    put(map, "test3", "567");
+    put(map, "test4", "678");
+    put(map, "test5", "789");
+    put(map, "test6", "345");
+    put(map, "test7", "567");
+    put(map, "test8", "678");
+    put(map, "test9", "789");
 
-    V val_2 = get(map,"test1");
+    V val_2 = get(map,"test9");
     puts(val_2);
 
     put(map, "test2", NULL);
-    put(map, "test1", "456");
+    put(map, "test8", "456");
 
-    V val_1 = get(map,"test1");
+    V val_1 = get(map,"test8");
     puts(val_1);
 
-    map_remove(map,"test1");
+    map_remove(map,"test6");
 
-    V val_3 = get(map,"test1");
+    V val_3 = get(map,"test7");
     puts(val_3);
 
-    if(get(map,"test1")==NULL)
+    if(get(map,"test6")==NULL)
         printf("empty!\n");
     else
         puts(val_3);
