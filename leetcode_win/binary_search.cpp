@@ -11,7 +11,7 @@ class Solution {
             int mid = left + (right-left)/2;
             int ans = -1;
 
-            while(left<right)
+            while(left<=right)
             {
                 mid = left + (right-left)/2;
                 if(nums[mid]==target)
@@ -37,11 +37,12 @@ int main()
 {
     Solution s;
     vector<int> v;
-    for(int i=0;i<5;i++)
-    {
-        v.push_back(i);
-    }
-    s.search(v,0);
+    // for(int i=0;i<5;i++)
+    // {
+    //     v.push_back(i);
+    // }
+    v.push_back(5);
+    s.search(v,5);
 
     system("pause"); // 防止运行后自动退出，需头文件stdlib.h
     return 0;
