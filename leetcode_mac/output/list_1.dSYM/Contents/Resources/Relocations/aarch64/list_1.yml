@@ -1,0 +1,8 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/yujianxu/Documents/Mac_files/cpp_code/leetcode_mac/output/list_1'
+relocations:
+  - { offset: 0x514D, size: 0x8, addend: 0x0, symName: __ZStL8__ioinit, symObjAddr: 0x15DA6, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offset: 0x5336, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x2C, symBinAddr: 0x100003DB8, symSize: 0x9C }
+  - { offset: 0x53C4, size: 0x8, addend: 0x0, symName: __ZN8ListNodeC1Ei, symObjAddr: 0x0, symBinAddr: 0x100003D8C, symSize: 0x2C }
+...
