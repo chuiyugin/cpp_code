@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "dirent.h": "c",
+        "errno.h": "c",
+        "error.h": "c",
+        "stdlib.h": "c",
+        "crtdefs.h": "c",
+        "stat.h": "c"
+    }
+}
