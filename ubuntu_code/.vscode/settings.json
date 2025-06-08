@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "limits": "c"
+        "limits": "c",
+        "types.h": "c",
+        "fcntl.h": "c",
+        "errno.h": "c"
     }
 }
