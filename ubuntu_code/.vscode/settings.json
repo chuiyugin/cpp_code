@@ -3,6 +3,7 @@
         "limits": "c",
         "types.h": "c",
         "fcntl.h": "c",
-        "errno.h": "c"
+        "errno.h": "c",
+        "stdlib.h": "c"
     }
 }
