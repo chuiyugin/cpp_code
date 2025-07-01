@@ -21,8 +21,8 @@ int main(int argc, char* argv[])
     //execl("test_environ", "./test_environ", "aaa", "bbb", "ccc", NULL);
     //p:会根据path环境变量查找可执行程序
     //execlp("test_environ", "./test_environ", "aaa", "bbb", "ccc", NULL);
-    execle("test_environ", "./test_environ", "aaa", "bbb", "ccc", NULL, new_env);
-    //execv("test_environ", args);
+    //execle("test_environ", "./test_environ", "aaa", "bbb", "ccc", NULL, new_env);
+    execv("test_environ", args);
     //p:会根据path环境变量查找可执行程序
     //execvp("test_environ", args);
     //execve("test_environ", args, new_env);

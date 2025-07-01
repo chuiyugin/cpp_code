@@ -1,4 +1,4 @@
-##!/bin/sh
+#!/bin/sh
 #本脚本请在git bash中运行
 # 作者：Huanhao
 # 在终端输入 ./push.sh 即可打开脚本
