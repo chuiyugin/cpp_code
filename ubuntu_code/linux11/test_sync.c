@@ -31,18 +31,16 @@ int main(int argc, char* argv[])
     long* value = (long*)calloc(1, sizeof(long)); // *value = 0
 
     pthread_t tid1, tid2;
-
     int err = pthread_create(&tid1, NULL, start_routine, value);
     if(err){
         error(1, err, "pthread_create");
     }
-
     err = pthread_create(&tid2, NULL, start_routine, value);
     if(err){
         error(1, err, "pthread_create");
     }
 
-    // 主线程：等待子线程结束，并接收返回值
+    // 主线程：等待子线程结束
     err = pthread_join(tid1, NULL);
     if(err){
         error(1, err, "pthread_join %lu\n", tid1);
