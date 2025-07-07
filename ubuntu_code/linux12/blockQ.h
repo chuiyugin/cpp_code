@@ -13,6 +13,7 @@
 #include <string.h>
 #include <signal.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #define N 1024
 
@@ -34,7 +35,7 @@ typedef struct {
 BlockQ* blockq_create(void);
 void blockq_destroy(BlockQ* q);
 
-void blockq_push(E val);
+void blockq_push(BlockQ* q, E val);
 E blockq_pop(BlockQ* q);
 E blockq_peek(BlockQ* q);
 bool blockq_empty(BlockQ* q);
